@@ -807,8 +807,9 @@ ListLoose = a:StartList
 		{
 			node *li;
 			li = b->children;
-			li->str = realloc(li->str, strlen(li->str) + 3);
-			strcat(li->str, "\n\n");  /* In loose list, \n\n added to end of each element */
+			size_t new_size = strlen(li->str) + 3;
+			li->str = realloc(li->str, new_size);
+			strncat(li->str, "\n\n", new_size);  /* In loose list, \n\n added to end of each element */
 			a = cons(b, a);
 		} )+
 		{ $$ = list(LIST, a); }
