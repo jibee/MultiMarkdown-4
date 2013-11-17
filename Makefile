@@ -5,10 +5,13 @@
 # - Fletcher T. Penney
 
 CFLAGS ?= -Wall -g -O3 -include GLibFacade.h
+ARFLAGS ?= cr
 PROGRAM = multimarkdown
+LIB = libmultimarkdown.a
 VERSION = 4.3.1
 
-OBJS= multimarkdown.o parse_utilities.o parser.o GLibFacade.o writer.o text.o html.o latex.o memoir.o beamer.o opml.o odf.o critic.o
+OBJS = multimarkdown.o
+LIB_OBJS = parse_utilities.o parser.o GLibFacade.o writer.o text.o html.o latex.o memoir.o beamer.o opml.o odf.o critic.o
 
 GREG= greg/greg
 
@@ -23,11 +26,14 @@ parser.c : parser.leg greg/greg parser.h
 $(GREG): greg
 	$(MAKE) -C greg
 
-$(PROGRAM) : $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+$(PROGRAM) : $(OBJS) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIB)
+
+$(LIB) : $(LIB_OBJS)
+	$(AR) $(ARFLAGS) $@ $(LIB_OBJS)
 
 clean:
-	rm -f $(PROGRAM) $(OBJS) parser.c enumMap.txt speed*.txt; \
+	rm -f $(PROGRAM) $(OBJS) $(LIB) parser.c enumMap.txt speed*.txt; \
 	rm -rf mac_installer/Package_Root/usr/local/bin mac_installer/Support_Root mac_installer/*.pkg; \
 	rm -f mac_installer/Resources/*.html
 

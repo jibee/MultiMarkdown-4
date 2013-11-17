@@ -151,3 +151,10 @@ struct node {
 };
 
 typedef struct node node;
+/* This function returns the node tree as it is employed internally by
+markdown_to_string function. It is your responsibility to free the node
+structure by calling free_node_tree once you are done.
+*/
+node * markdown_to_node(char * source, unsigned long extensions, int format);
+/* Recursively deallocates the node tree */
+void   free_node_tree(node * n);

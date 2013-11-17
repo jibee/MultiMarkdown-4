@@ -1405,8 +1405,8 @@ node * process_raw_blocks(node * n, unsigned long extensions) {
 	return n;
 }
 
-char * markdown_to_string(char * source, unsigned long extensions, int format) {
-	char *out;
+node * markdown_to_node(char * source, unsigned long extensions, int format) {
+	node *out;
 	char *formatted;
 	char *critic_resolved;
 	node *refined;
@@ -1453,7 +1453,7 @@ char * markdown_to_string(char * source, unsigned long extensions, int format) {
 		
 		free(formatted);
 		
-		out = strdup("MultiMarkdown was unable to parse this file.");
+		out = NULL;
 		return out;
 	}
 
@@ -1467,15 +1467,31 @@ char * markdown_to_string(char * source, unsigned long extensions, int format) {
 	} else {
 //		fprintf(stderr, "No autolabels\n");
 	}
-	
-	/* Show what we got */
-	out = export_node_tree(refined, format, extensions);
-	
+	out = refined;
 	/* clean up */
-	free_parser_data((parser_data *)g.data);
+	free_node_tree(((parser_data*)g.data)->autolabels);
+	free((parser_data *)g.data);	/* we're not using free_parser_data to preserve result tree */
 	yydeinit(&g);
 	
 	free(formatted);
+	return refined;
+}
+
+char * markdown_to_string(char * source, unsigned long extensions, int format) {
+	char *out;
+	node * refined = markdown_to_node(source, extensions, format);
+	if(NULL==refined)
+	{
+		out = strdup("MultiMarkdown was unable to parse this file.");
+	}
+	else
+	{
+		/* Show what we got */
+		out = export_node_tree(refined, format, extensions);
+
+		/* clean up */
+		free_node_tree(refined);
+	}
 	return out;
 }
 
